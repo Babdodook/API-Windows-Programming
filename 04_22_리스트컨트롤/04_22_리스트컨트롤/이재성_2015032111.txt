@@ -1,0 +1,141 @@
+#include <windows.h>
+#include <commctrl.h>
+#include "resource.h"
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK Dlg2(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
+HINSTANCE hInst;
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
+{
+	HWND 	 hwnd;
+	MSG 	 msg;
+	WNDCLASS WndClass;
+	hInst = hInstance;
+	WndClass.style = CS_HREDRAW | CS_VREDRAW;
+	WndClass.lpfnWndProc = WndProc;
+	WndClass.cbClsExtra = 0;
+	WndClass.cbWndExtra = 0;
+	WndClass.hInstance = hInstance;
+	WndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	WndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	WndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	WndClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
+	WndClass.lpszClassName = "Window Class Name";
+	RegisterClass(&WndClass);
+	hwnd = CreateWindow("Window Class Name", "Window Title Name",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		NULL,
+		NULL,
+		hInstance,
+		NULL
+	);
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	return (int)msg.wParam;
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+{
+	HWND hDlg = NULL;
+
+	switch (iMsg)
+	{
+	case WM_CREATE:
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case ID_40001:
+			if (!IsWindow(hDlg))
+			{
+				hDlg = CreateDialog(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, Dlg2);
+				ShowWindow(hDlg, SW_SHOW);
+			}
+			break;
+		}
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	}
+	return DefWindowProc(hwnd, iMsg, wParam, lParam);
+}
+
+void MakeColumn(HWND hDlg)
+{
+	char *name[2] = { (char*)"이름", (char*)"전화번호" };
+	LVCOLUMN lvCol = { 0, };
+	HWND hList;
+	int i;
+	hList = GetDlgItem(hDlg, IDC_LIST1);
+	lvCol.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
+	lvCol.fmt = LVCFMT_LEFT;
+
+	for (i = 0; i < 2; i++)
+	{
+		lvCol.cx = 90;
+		lvCol.pszText = name[i];
+		lvCol.iSubItem = i;
+		SendMessage(hList, LVM_INSERTCOLUMN, (WPARAM)i, (LPARAM)&lvCol);
+	}
+}
+
+static int i = 0;
+
+void InsertData(HWND hDlg)
+{
+	LVITEM item;	//컬럼 생성 후 각 항목에 데이터 입력하기 위한 구조체
+	HWND hList;
+	char *name = nullptr;
+	char *phone = nullptr;
+	char Edit_name[20] = {};
+	char Edit_phone[20] = {};
+	hList = GetDlgItem(hDlg, IDC_LIST1);
+
+	GetDlgItemText(hDlg, IDC_EDIT1, Edit_name, 20);
+	GetDlgItemText(hDlg, IDC_EDIT2, Edit_phone, 20);
+	name = Edit_name;
+	phone = Edit_phone;
+
+	item.mask = LVIF_TEXT;	//텍스트 형식
+	item.iItem = i;	//몇번째 항목인지
+	item.iSubItem = 0;	//아이템에서 지정한 행에서 몇번째 서브항목인지
+	item.pszText = name;	//서브항목에 출력할 문자열
+	ListView_InsertItem(hList, &item);	//항목추가
+	ListView_SetItemText(hList, i, 1, phone);	//두번째 서브항목
+	i++;
+}
+
+BOOL CALLBACK Dlg2(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (iMsg)
+	{
+	case WM_INITDIALOG:
+		MakeColumn(hDlg);
+		return 1;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDOK:
+			InsertData(hDlg);
+			return 0;
+
+		case IDCANCEL:
+			DestroyWindow(hDlg);
+			hDlg = NULL;
+			return 0;
+		}
+		break;
+	}
+	return 0;
+}

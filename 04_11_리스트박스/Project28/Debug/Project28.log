@@ -1,0 +1,5 @@
+﻿  소스.cpp
+c:\users\user\source\repos\project28\project28\소스.cpp(106): warning C4390: ';': 제어된 빈 문이 있습니다. 이 문이 필요합니까?
+c:\users\user\source\repos\project28\project28\소스.cpp(71): warning C4101: 'hdc' :참조되지 않은 지역 변수입니다.
+c:\users\user\source\repos\project28\project28\소스.cpp(72): warning C4101: 'ps' :참조되지 않은 지역 변수입니다.
+  Project28.vcxproj -> C:\Users\user\source\repos\Project28\Debug\Project28.exe
